@@ -8,26 +8,25 @@ import com.group.libraryapp.domain.user.loanhistory.UserLoanStatus
 import com.group.libraryapp.dto.user.request.UserCreateRequest
 import com.group.libraryapp.dto.user.request.UserUpdateRequest
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.transaction.annotation.Transactional
+import javax.persistence.EntityManager
 
 @SpringBootTest
 class UserServiceTest @Autowired constructor(
     private val userRepository: UserRepository,
     private val userService: UserService,
     private val userLoanHistoryRepository: UserLoanHistoryRepository,
+    @Autowired
+    val em: EntityManager
 ) {
-
-    @AfterEach
-    fun clean() {
-        userRepository.deleteAll()
-    }
 
     @Test
     @DisplayName("유저 저장이 정삭 동작 한다")
+    @Transactional
     fun saveUserTest() {
         // given
         val request = UserCreateRequest("jinwook", null)
@@ -44,6 +43,7 @@ class UserServiceTest @Autowired constructor(
 
     @Test
     @DisplayName("유저 조회가 정상 동작 한다")
+    @Transactional
     fun getUsers() {
         // given
         userRepository.saveAll(
@@ -64,6 +64,7 @@ class UserServiceTest @Autowired constructor(
 
     @Test
     @DisplayName("유저 업데이트가 정상 동작한다")
+    @Transactional
     fun updateUsernameTest() {
         // given
         val savedUser = userRepository.save(User("A", null))
@@ -79,6 +80,7 @@ class UserServiceTest @Autowired constructor(
 
     @Test
     @DisplayName("유저 삭제가 정상 동작한")
+    @Transactional
     fun deleteUserTest() {
         // given
         userRepository.save(User("A", null))
@@ -92,6 +94,7 @@ class UserServiceTest @Autowired constructor(
 
     @Test
     @DisplayName("대출 기록이 없는 유저도 응답에 포함된다")
+    @Transactional
     fun getUserLoanHistoriesTest1() {
         // given
         userRepository.save(User("A", null))
@@ -108,6 +111,7 @@ class UserServiceTest @Autowired constructor(
 
     @Test
     @DisplayName("대출 기록이 많은 유저의 응답에 정상 동작한다")
+    @Transactional
     fun getUserLoanHistoriesTest2() {
         // given
         val savedUser = userRepository.save(User("A", null))
@@ -118,6 +122,10 @@ class UserServiceTest @Autowired constructor(
                 UserLoanHistory.fixture(savedUser, "책3", UserLoanStatus.RETURNED),
             )
         )
+
+        // 영속성 컨텍스트 초기화
+        em.flush()
+        em.clear()
 
         // when
         val results = userService.getUserLoanHistories()
@@ -134,6 +142,7 @@ class UserServiceTest @Autowired constructor(
 
     @Test
     @DisplayName("위의 두 개의 경우가 합쳐진 테스트")
+    @Transactional
     fun getUserLoanHistoriesTest3() {
         // given
         val savedUsers = userRepository.saveAll(
@@ -150,6 +159,10 @@ class UserServiceTest @Autowired constructor(
                 UserLoanHistory.fixture(savedUsers[0], "책3", UserLoanStatus.RETURNED),
             )
         )
+
+        // 영속성 컨텍스트 초기화
+        em.flush()
+        em.clear()
 
         // when
         val results = userService.getUserLoanHistories()
