@@ -15,10 +15,14 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 
 allOpen {
     annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
 }
 
 noArg{
     annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
 }
 
 configurations {
@@ -30,8 +34,6 @@ configurations {
 repositories {
     mavenCentral()
 }
-
-extra["testcontainersVersion"] = "1.17.4"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -47,18 +49,11 @@ dependencies {
     implementation("com.querydsl:querydsl-jpa:$querydslVersion")
     kapt("com.querydsl:querydsl-apt:$querydslVersion:jpa")
 
-
     // Database
     runtimeOnly("com.h2database:h2")
 
     // test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.testcontainers:testcontainers-bom:${property("testcontainersVersion")}")
-    }
 }
 
 tasks.withType<KotlinCompile> {
