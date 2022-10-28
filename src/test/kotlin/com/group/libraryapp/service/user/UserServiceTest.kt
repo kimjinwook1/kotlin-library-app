@@ -79,7 +79,7 @@ class UserServiceTest @Autowired constructor(
     }
 
     @Test
-    @DisplayName("유저 삭제가 정상 동작한")
+    @DisplayName("유저 삭제가 정상 동작한다")
     @Transactional
     fun deleteUserTest() {
         // given
